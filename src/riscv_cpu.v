@@ -5,7 +5,7 @@ module riscv_cpu (
     input         clk, reset,
     output [31:0] PC,
     input  [31:0] Instr,
-    output        MemWrite,
+    output        MemWriteW,
     output [31:0] Mem_WrAddr, Mem_WrData,
     input  [31:0] ReadData,
     output [31:0] Result,
@@ -15,17 +15,18 @@ module riscv_cpu (
 
 wire        ALUSrc, RegWrite, Branch, Jump, Jalr;
 wire [1:0]  ResultSrc, ImmSrc;
-wire [2:0]  ALUControl;
+wire [3:0]  ALUControl;
+wire MemWriteD;
+wire [31:0] InstrD;
 
-controller  c   (Instr[6:0], Instr[14:12], Instr[30],
-                ResultSrc, MemWrite, ALUSrc,
+
+controller  c   (InstrD[6:0], InstrD[14:12], InstrD[30],
+                ResultSrc, MemWriteD, ALUSrc,
                 RegWrite, Branch, Jump, Jalr, ImmSrc, ALUControl);
 
 datapath    dp  (clk, reset, ResultSrc,
-                ALUSrc, RegWrite, ImmSrc, ALUControl, Branch, Jump, Jalr,
-                PC, Instr, Mem_WrAddr, Mem_WrData, ReadData, Result, PCW, ALUResultW, WriteDataW);
+                ALUSrc, RegWrite,MemWriteD, ImmSrc, ALUControl, Branch, Jump, Jalr,
+                PC,MemWriteW, Instr, Mem_WrAddr, Mem_WrData, ReadData, Result, PCW, ALUResultW, WriteDataW, funct3,InstrD);
 
-// Eventually will be removed while adding pipeline registers
-assign funct3 = Instr[14:12];
 
 endmodule

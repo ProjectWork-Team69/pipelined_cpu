@@ -16,6 +16,9 @@ always @(*) begin
         3'b000: Branch =    Zero; // beq
         3'b001: Branch =   !Zero; // bne
         3'b101: Branch = !ALUR31; // bge
+        3'b100: Branch = ALUR31; //blt
+		3'b110: Branch =ALUR31; //bltu
+		3'b111: Branch =!ALUR31 ; //bgeu
         default: Branch = 1'b0;
     endcase
 end
