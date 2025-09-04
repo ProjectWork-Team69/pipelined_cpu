@@ -56,7 +56,7 @@ wire [4:0]RdM;
 // wires for pipeline registers memory to writeback 
 wire [31:0]ALUResultM;
 wire RegWriteW;
-wire [31:0] lAuiPCW,ReadDataW;
+wire [31:0] lAuiPCW,lAuiPCM,ReadDataW;
 wire [4:0]RdW;
 wire [1:0]ForwardBE,ForwardAE;
 
