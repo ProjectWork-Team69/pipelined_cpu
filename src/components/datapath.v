@@ -29,7 +29,7 @@ wire [2:0] funct3E,funct3D;
 wire StallF,stallD;
 wire FlushD;
 wire [31:0] PCPlus4F;
-wire [31:0] InstrD,InstrE,PCD;
+wire [31:0] InstrE,PCD;
 wire [31:0] PCPlus4D;
 
 

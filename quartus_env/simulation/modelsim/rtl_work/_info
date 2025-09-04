@@ -1,0 +1,567 @@
+m255
+K4
+z2
+!s11f vlog 2020.1 2020.02, Feb 28 2020
+13
+!s112 1.1
+!i10d 8192
+!i10e 25
+!i10f 100
+cModel Technology
+Z0 d/home/sateesh/MCU/pipelined_cpu/quartus_env/simulation/modelsim
+vadder
+Z1 !s110 1757012888
+!i10b 1
+!s100 jXE67fZjiCj2W4l?`i:H?0
+Z2 !s11b Dg1SIo80bB@j0V0VzS_@n1
+IIEZ<ElY4>^NVaO]Q_>7`f2
+Z3 VDg1SIo80bB@j0V0VzS_@n1
+R0
+Z4 w1730789302
+8/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/adder.v
+F/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/adder.v
+!i122 20
+L0 4 8
+Z5 OV;L;2020.1;71
+r1
+!s85 0
+31
+Z6 !s108 1757012888.000000
+!s107 /home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/adder.v|
+!s90 -reportprogress|300|-vlog01compat|-work|work|+incdir+/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components|/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/adder.v|
+!i113 1
+Z7 o-vlog01compat -work work
+Z8 !s92 -vlog01compat -work work +incdir+/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components
+Z9 tCvgOpt 0
+valu
+R1
+!i10b 1
+!s100 R@l9HhoI2g7DF8UYJgR4N0
+R2
+I;jSA8fo75iZT3NMZ1TTJn1
+R3
+R0
+w1756798414
+8/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/alu.v
+F/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/alu.v
+!i122 19
+L0 3 28
+R5
+r1
+!s85 0
+31
+R6
+!s107 /home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/alu.v|
+!s90 -reportprogress|300|-vlog01compat|-work|work|+incdir+/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components|/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/alu.v|
+!i113 1
+R7
+R8
+R9
+valu_decoder
+R1
+!i10b 1
+!s100 9W5i<J:737=iR^g:;g]Xb3
+R2
+I[@5V:_G<[9WlKXni>;8XJ3
+R3
+R0
+w1756581318
+8/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/alu_decoder.v
+F/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/alu_decoder.v
+!i122 18
+L0 4 35
+R5
+r1
+!s85 0
+31
+R6
+!s107 /home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/alu_decoder.v|
+!s90 -reportprogress|300|-vlog01compat|-work|work|+incdir+/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components|/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/alu_decoder.v|
+!i113 1
+R7
+R8
+R9
+vbranching_unit
+Z10 !s110 1757012887
+!i10b 1
+!s100 ZLzhiYj5:6dEf3AYm>I7n2
+R2
+IJ9acEjb;m;RbI0]lVX<A03
+R3
+R0
+w1756584459
+8/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/branching_unit.v
+F/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/branching_unit.v
+!i122 8
+L0 4 23
+R5
+r1
+!s85 0
+31
+Z11 !s108 1757012887.000000
+!s107 /home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/branching_unit.v|
+!s90 -reportprogress|300|-vlog01compat|-work|work|+incdir+/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components|/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/branching_unit.v|
+!i113 1
+R7
+R8
+R9
+vcontroller
+R10
+!i10b 1
+!s100 DUbDfC0[NeU8KJdPN@<=:3
+R2
+I35VnAiUUDCXR1kP@F1<1l0
+R3
+R0
+w1756626879
+8/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/controller.v
+F/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/controller.v
+!i122 17
+L0 4 20
+R5
+r1
+!s85 0
+31
+R11
+!s107 /home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/controller.v|
+!s90 -reportprogress|300|-vlog01compat|-work|work|+incdir+/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components|/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/controller.v|
+!i113 1
+R7
+R8
+R9
+vdata_mem
+R10
+!i10b 1
+!s100 ^LZOeTL9Oo0YT7c84b>h;2
+R2
+IA6L3QYgQMW:GTT@P1mI;_0
+R3
+R0
+w1756798494
+8/home/sateesh/MCU/pipelined_cpu/quartus_env/code/data_mem.v
+F/home/sateesh/MCU/pipelined_cpu/quartus_env/code/data_mem.v
+!i122 7
+L0 1 79
+R5
+r1
+!s85 0
+31
+R11
+!s107 /home/sateesh/MCU/pipelined_cpu/quartus_env/code/data_mem.v|
+!s90 -reportprogress|300|-vlog01compat|-work|work|+incdir+/home/sateesh/MCU/pipelined_cpu/quartus_env/code|/home/sateesh/MCU/pipelined_cpu/quartus_env/code/data_mem.v|
+!i113 1
+R7
+Z12 !s92 -vlog01compat -work work +incdir+/home/sateesh/MCU/pipelined_cpu/quartus_env/code
+R9
+vdatapath
+R10
+!i10b 1
+!s100 egeZgIdJNKTG>9Ie0=>EN1
+R2
+IOEP=1[YL96L^?ZE?ac:oZ1
+R3
+R0
+w1757012785
+8/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/datapath.v
+F/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/datapath.v
+!i122 16
+L0 3 122
+R5
+r1
+!s85 0
+31
+R11
+!s107 /home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/datapath.v|
+!s90 -reportprogress|300|-vlog01compat|-work|work|+incdir+/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components|/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/datapath.v|
+!i113 1
+R7
+R8
+R9
+vFF_de_ex
+R10
+!i10b 1
+!s100 cc7j<;UP^hmX_YIXz]FjY2
+R2
+IcSY3_PkFzQn]gWmS4638f1
+R3
+R0
+w1756733745
+8/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/FF_de_ex.v
+F/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/FF_de_ex.v
+!i122 4
+L0 1 72
+R5
+r1
+!s85 0
+31
+Z13 !s108 1757012886.000000
+!s107 /home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/FF_de_ex.v|
+!s90 -reportprogress|300|-vlog01compat|-work|work|+incdir+/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components|/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/FF_de_ex.v|
+!i113 1
+R7
+R8
+R9
+n@f@f_de_ex
+vFF_ex_me
+Z14 !s110 1757012886
+!i10b 1
+!s100 CFPLaDo_RZfc>Ola7UYPK0
+R2
+I;_i[8ihRBCS<H6<DYKCOh3
+R3
+R0
+w1756728241
+8/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/FF_ex_me.v
+F/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/FF_ex_me.v
+!i122 3
+L0 1 49
+R5
+r1
+!s85 0
+31
+R13
+!s107 /home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/FF_ex_me.v|
+!s90 -reportprogress|300|-vlog01compat|-work|work|+incdir+/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components|/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/FF_ex_me.v|
+!i113 1
+R7
+R8
+R9
+n@f@f_ex_me
+vFF_fe_de
+R14
+!i10b 1
+!s100 mhCRjkW=zeK13>7]4OJ;i2
+R2
+Ig46SR776Bh4^gC2IVhZY=2
+R3
+R0
+w1756629017
+8/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/FF_fe_de.v
+F/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/FF_fe_de.v
+!i122 2
+L0 1 31
+R5
+r1
+!s85 0
+31
+R13
+!s107 /home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/FF_fe_de.v|
+!s90 -reportprogress|300|-vlog01compat|-work|work|+incdir+/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components|/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/FF_fe_de.v|
+!i113 1
+R7
+R8
+R9
+n@f@f_fe_de
+vFF_me_wr
+R14
+!i10b 1
+!s100 gEII@2B`XSZeP=Lh<OUo[3
+R2
+I7A?AZXlkHoaXaX3amcKIh1
+R3
+R0
+w1756656935
+8/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/FF_me_wr.v
+F/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/FF_me_wr.v
+!i122 1
+L0 1 43
+R5
+r1
+!s85 0
+31
+R13
+!s107 /home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/FF_me_wr.v|
+!s90 -reportprogress|300|-vlog01compat|-work|work|+incdir+/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components|/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/FF_me_wr.v|
+!i113 1
+R7
+R8
+R9
+n@f@f_me_wr
+vhazard
+R14
+!i10b 1
+!s100 oEa^g?`iV_@ZY=_h<mfWE0
+R2
+ILW5`B0TIa_6k@NnQg:^;W3
+R3
+R0
+w1756651765
+8/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/hazard.v
+F/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/hazard.v
+!i122 0
+L0 1 51
+R5
+r1
+!s85 0
+31
+R13
+!s107 /home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/hazard.v|
+!s90 -reportprogress|300|-vlog01compat|-work|work|+incdir+/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components|/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/hazard.v|
+!i113 1
+R7
+R8
+R9
+vimm_extend
+R10
+!i10b 1
+!s100 KCY0HN8a_SDDT@o^3341e2
+R2
+I_X<Ndnh2@]BPM8::UQUDc0
+R3
+R0
+R4
+8/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/imm_extend.v
+F/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/imm_extend.v
+!i122 15
+L0 3 21
+R5
+r1
+!s85 0
+31
+R11
+!s107 /home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/imm_extend.v|
+!s90 -reportprogress|300|-vlog01compat|-work|work|+incdir+/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components|/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/imm_extend.v|
+!i113 1
+R7
+R8
+R9
+vinstr_mem
+R1
+!i10b 1
+!s100 edU3X0aMQ1]cL11M;OEm01
+R2
+I^KQ[3NHb]0kZC>]`5i0<31
+R3
+R0
+w1731323317
+8/home/sateesh/MCU/pipelined_cpu/quartus_env/code/instr_mem.v
+F/home/sateesh/MCU/pipelined_cpu/quartus_env/code/instr_mem.v
+!i122 21
+L0 4 17
+R5
+r1
+!s85 0
+31
+R6
+!s107 /home/sateesh/MCU/pipelined_cpu/quartus_env/code/instr_mem.v|
+!s90 -reportprogress|300|-vlog01compat|-work|work|+incdir+/home/sateesh/MCU/pipelined_cpu/quartus_env/code|/home/sateesh/MCU/pipelined_cpu/quartus_env/code/instr_mem.v|
+!i113 1
+R7
+R12
+R9
+vmain_decoder
+R10
+!i10b 1
+!s100 3i;a3A6g6UO7Rz4]KEW112
+R2
+IMh9`VZ4FUohRN713oIRKh3
+R3
+R0
+w1756730259
+8/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/main_decoder.v
+F/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/main_decoder.v
+!i122 14
+L0 4 32
+R5
+r1
+!s85 0
+31
+R11
+!s107 /home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/main_decoder.v|
+!s90 -reportprogress|300|-vlog01compat|-work|work|+incdir+/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components|/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/main_decoder.v|
+!i113 1
+R7
+R8
+R9
+vmux2
+R10
+!i10b 1
+!s100 mO6_hILT?Jn:Zh>b88HZ<2
+R2
+I4TnP2IRmEQg8nF75@K0l;3
+R3
+R0
+w1756652112
+8/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/mux2.v
+F/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/mux2.v
+!i122 13
+Z15 L0 4 9
+R5
+r1
+!s85 0
+31
+R11
+!s107 /home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/mux2.v|
+!s90 -reportprogress|300|-vlog01compat|-work|work|+incdir+/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components|/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/mux2.v|
+!i113 1
+R7
+R8
+R9
+vmux3
+R10
+!i10b 1
+!s100 fShz_RzH66YN6G@4dH?@Y3
+R2
+I^>3ZBa=k<m[hFmMj98kK]1
+R3
+R0
+R4
+8/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/mux3.v
+F/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/mux3.v
+!i122 12
+R15
+R5
+r1
+!s85 0
+31
+R11
+!s107 /home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/mux3.v|
+!s90 -reportprogress|300|-vlog01compat|-work|work|+incdir+/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components|/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/mux3.v|
+!i113 1
+R7
+R8
+R9
+vmux4
+R10
+!i10b 1
+!s100 V4YdM>hK^I8CMb?cH8Cej3
+R2
+Iz_]MaQEh9YjW:lBX59_Qc3
+R3
+R0
+R4
+8/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/mux4.v
+F/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/mux4.v
+!i122 11
+R15
+R5
+r1
+!s85 0
+31
+R11
+!s107 /home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/mux4.v|
+!s90 -reportprogress|300|-vlog01compat|-work|work|+incdir+/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components|/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/mux4.v|
+!i113 1
+R7
+R8
+R9
+vpl_riscv_cpu
+R10
+!i10b 1
+!s100 1^>X_9`UB`;oN?<]I1a2Z0
+R2
+IlAdMFXHkLRZ`U=3oj`4`T2
+R3
+R0
+w1756727023
+8/home/sateesh/MCU/pipelined_cpu/quartus_env/code/pl_riscv_cpu.v
+F/home/sateesh/MCU/pipelined_cpu/quartus_env/code/pl_riscv_cpu.v
+!i122 5
+L0 4 28
+R5
+r1
+!s85 0
+31
+R11
+!s107 /home/sateesh/MCU/pipelined_cpu/quartus_env/code/pl_riscv_cpu.v|
+!s90 -reportprogress|300|-vlog01compat|-work|work|+incdir+/home/sateesh/MCU/pipelined_cpu/quartus_env/code|/home/sateesh/MCU/pipelined_cpu/quartus_env/code/pl_riscv_cpu.v|
+!i113 1
+R7
+R12
+R9
+vreg_file
+R10
+!i10b 1
+!s100 hDfJeCPL76ldZ`N?EoZ[a3
+R2
+Ic3JQW3l?j@oLZg=7IJPzc0
+R3
+R0
+w1756801706
+8/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/reg_file.v
+F/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/reg_file.v
+!i122 10
+L0 8 24
+R5
+r1
+!s85 0
+31
+R11
+!s107 /home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/reg_file.v|
+!s90 -reportprogress|300|-vlog01compat|-work|work|+incdir+/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components|/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/reg_file.v|
+!i113 1
+R7
+R8
+R9
+vreset_ff
+R10
+!i10b 1
+!s100 >;b:dIN?F0PSR=d_17OQU2
+R2
+IV9JK;zJ>[EZGIXm[<fP=Z2
+R3
+R0
+w1731487316
+8/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/reset_ff.v
+F/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/reset_ff.v
+!i122 9
+L0 4 16
+R5
+r1
+!s85 0
+31
+R11
+!s107 /home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/reset_ff.v|
+!s90 -reportprogress|300|-vlog01compat|-work|work|+incdir+/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components|/home/sateesh/MCU/pipelined_cpu/quartus_env/code/components/reset_ff.v|
+!i113 1
+R7
+R8
+R9
+vriscv_cpu
+R10
+!i10b 1
+!s100 6U?I_1Onk?X@WZ0fG9QgO1
+R2
+IlG=5V:XzYImTG[Xb6>@mI2
+R3
+R0
+w1756803065
+8/home/sateesh/MCU/pipelined_cpu/quartus_env/code/riscv_cpu.v
+F/home/sateesh/MCU/pipelined_cpu/quartus_env/code/riscv_cpu.v
+!i122 6
+L0 4 29
+R5
+r1
+!s85 0
+31
+R11
+!s107 /home/sateesh/MCU/pipelined_cpu/quartus_env/code/riscv_cpu.v|
+!s90 -reportprogress|300|-vlog01compat|-work|work|+incdir+/home/sateesh/MCU/pipelined_cpu/quartus_env/code|/home/sateesh/MCU/pipelined_cpu/quartus_env/code/riscv_cpu.v|
+!i113 1
+R7
+R12
+R9
+vtb
+R1
+!i10b 1
+!s100 54`52cD4]?;zGPCA;:63i2
+R2
+IFAF>gm765i`JfYJj[<ikR0
+R3
+R0
+w1756806122
+8/home/sateesh/MCU/pipelined_cpu/quartus_env/.test/tb.v
+F/home/sateesh/MCU/pipelined_cpu/quartus_env/.test/tb.v
+!i122 22
+L0 3 521
+R5
+r1
+!s85 0
+31
+R6
+!s107 /home/sateesh/MCU/pipelined_cpu/quartus_env/.test/tb.v|
+!s90 -reportprogress|300|-vlog01compat|-work|work|+incdir+/home/sateesh/MCU/pipelined_cpu/quartus_env/.test|/home/sateesh/MCU/pipelined_cpu/quartus_env/.test/tb.v|
+!i113 1
+R7
+!s92 -vlog01compat -work work +incdir+/home/sateesh/MCU/pipelined_cpu/quartus_env/.test
+R9
