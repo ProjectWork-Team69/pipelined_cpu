@@ -23,6 +23,7 @@ wire [31:0] PCNext, PCJalr,PCPlus4E,PCPlus4W, PCTargetE, AuiPC, lAuiPC;
 wire [31:0]  SrcA, SrcB, WriteDataE ;
 wire Zero, TakeBranch;
 wire [2:0] funct3E,funct3D;
+wire SrcA_sign, SrcB_sign;
 
 
 //wire for pipleine registers fetch to decode
@@ -61,7 +62,8 @@ wire [4:0]RdW;
 wire [1:0]ForwardBE,ForwardAE;
 
 wire PCSrc = ((BranchE & TakeBranch) || JumpE || JalrE) ? 1'b1 : 1'b0;
-
+assign SrcA_sign = SrcA[31];
+assign SrcB_sign = SrcB[31];
 
 // next PC logic
 mux2 #(32)     pcmux(PCPlus4F, PCTargetE, PCSrc, PCNext);
@@ -98,7 +100,7 @@ adder          pcaddbranch(PCE, ImmExtE, PCTargetE);
 adder #(32)    auipcadder ({InstrE[31:12], 12'b0}, PCE, AuiPC);
 mux2 #(32)     lauipcmux (AuiPC, {InstrE[31:12], 12'b0}, InstrE[5], lAuiPC);
 
-branching_unit bu (InstrE[14:12], Zero, ALUResultE[31], TakeBranch);
+branching_unit bu (InstrE[14:12], Zero, ALUResultE[31],SrcA_sign,SrcB_sign, TakeBranch);
 
 // Pipeline Register 3 -> Execute | Memory
 FF_ex_me reg3(clk,RegWriteE,ResultSrcE,MemWriteE,ALUResultE,WriteDataE,PCE,RdE,PCPlus4E,lAuiPC,funct3E,

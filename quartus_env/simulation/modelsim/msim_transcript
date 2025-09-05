@@ -353,3 +353,5 @@
 # ** Note: $stop    : /home/sateesh/MCU/pipelined_cpu/quartus_env/.test/tb.v(513)
 #    Time: 2385 ns  Iteration: 1  Instance: /tb
 # Break in Module tb at /home/sateesh/MCU/pipelined_cpu/quartus_env/.test/tb.v line 513
+# End time: 00:46:45 on Sep 05,2025, Elapsed time: 0:08:37
+# Errors: 0, Warnings: 0
