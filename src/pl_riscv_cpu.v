@@ -12,7 +12,7 @@ module pl_riscv_cpu (
 
 wire [31:0] Instr, PC;
 wire [31:0] DataAdr_rv32, WriteData_rv32;
-wire [ 2:0] Store, funct3;
+wire  [2:0] Store, funct3;
 wire        MemWrite_rv32;
 
 // instantiate processor and memories
