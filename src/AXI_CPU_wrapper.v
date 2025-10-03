@@ -53,6 +53,19 @@ module AXI_CPU_wrapper #
     output wire                     m_axil_rready
 );
 
+pl_riscv_cpu u_cpu (
+    .clk         (clk),
+    .rstn        (rstn),
+    .Ext_MemWrite(Ext_MemWrite),
+    .Ext_WriteData(Ext_WriteData),
+    .Ext_DataAdr (Ext_DataAdr),
+    .MemValid    (MemValid),
+    .MemReady    (MemReady),
+    .MemWrite    (MemWrite),
+    .WriteData   (WriteData),
+    .DataAdr     (DataAdr),
+    .ReadData    (ReadData)
+);
 reg [2:0] state, next_state;
 parameter IDLE=3'd0, WRITE_REQ=3'd1, WRITE_DATA=3'd2, READ_REQ=3'd3, WAIT_RDATA=3'd4, WAIT_BRESP=3'd5;
 
