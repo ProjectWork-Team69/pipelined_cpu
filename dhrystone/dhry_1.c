@@ -35,7 +35,7 @@ char            Ch_1_Glob,
 int             Arr_1_Glob [50];
 int             Arr_2_Glob [50] [50];
 
-Enumeration     Func_1 ();
+Enumeration     Func_1 (Enumeration, char);
   /* forward declaration necessary since Enumeration may not simply be int */
 
 #ifndef REG
@@ -57,9 +57,9 @@ extern  int     times ();
                 /* Measurements should last at least about 2 seconds */
 #endif
 #ifdef TIME
-extern long     time();
+extern long     time(long *t);
 #ifdef RISCV
-extern long     insn();
+extern long     insn(long *t);
 #endif
                 /* see library function "time"  */
 #define Too_Small_Time 2

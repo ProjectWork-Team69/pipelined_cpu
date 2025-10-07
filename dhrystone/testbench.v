@@ -1,6 +1,6 @@
 `timescale 1 ns / 1 ps
 
-module testbench_unified;
+module testbench;
     reg clk = 1;
     reg reset = 1;
     
@@ -43,7 +43,13 @@ module testbench_unified;
     
     // Load program
     initial begin
-        $readmemh("dhry.hex", memory);
+	integer i;
+	for (i = 0; i < 256*1024; i = i + 1)
+		memory[i] = 8'b0;
+
+        $readmemh("dhry.mem", memory);	
+	reset = 1'b1;
+	#10 reset = 1'b0;
     end
     
     // Instruction fetch (word-aligned, byte-addressed)
@@ -52,7 +58,7 @@ module testbench_unified;
     // Data memory read (combinational)
     reg [31:0] read_data;
     
-    always @(*) begin
+    always @(posedge clk) begin
         case(funct3)
             3'b000: begin // LB (Load Byte)
                 case(DataAdr[1:0])
@@ -191,7 +197,7 @@ module testbench_unified;
     // Waveform dump
     initial begin
         $dumpfile("testbench.vcd");
-        $dumpvars(0, testbench_unified);
+        $dumpvars(0, testbench);
     end
     
     // Monitor writes for debugging

@@ -1,0 +1,20 @@
+# Dhrystone build artifacts
+*.o
+*.d
+dhry.elf
+dhry.map
+dhry.hex
+dhry.dump
+dhry.mem
+dhry.bin
+
+# Verilog simulation files
+testbench.vvp
+testbench.vcd
+testbench.trace
+testbench.ins
+
+# Optional: editor backups or logs
+*.log
+*.bak
+

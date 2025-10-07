@@ -67,4 +67,11 @@ SECTIONS
     
     /* Global pointer (for relaxation) */
     __global_pointer$ = _sdata + 0x800;
+
 }
+
+PROVIDE(__bss_start = _sbss);
+PROVIDE(__bss_end   = _ebss);
+PROVIDE(__data_start = _sdata);
+PROVIDE(__data_end   = _edata);
+

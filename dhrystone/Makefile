@@ -3,15 +3,14 @@
 USE_MYSTDLIB = 0
 OBJS = dhry_1.o dhry_2.o stdlib.o
 CFLAGS = -MD -O3 -mabi=ilp32 -march=rv32i -DTIME -DRISCV
-TOOLCHAIN_PREFIX = riscv32-unknown-elf-
+TOOLCHAIN_PREFIX = $(HOME)/riscv32/bin/riscv32-unknown-elf-
+LINKER_SCRIPT = sections.lds
 
 ifeq ($(USE_MYSTDLIB),1)
 CFLAGS += -DUSE_MYSTDLIB -ffreestanding -nostdlib
 OBJS += start.o
-LINKER_SCRIPT = sections.lds
 else
 OBJS += syscalls.o
-LINKER_SCRIPT = linker.ld
 endif
 
 # Default target
@@ -45,6 +44,13 @@ dhry.elf: $(OBJS) $(LINKER_SCRIPT)
 	$(TOOLCHAIN_PREFIX)size $@
 endif
 
+# Generate raw binary file
+dhry.bin: dhry.elf
+	$(TOOLCHAIN_PREFIX)objcopy -O binary $< $@
+
+dhry.mem: dhry.bin
+	hexdump -ve '1/4 "%08x\n"' $< > $@
+
 # Compile C files
 %.o: %.c
 	$(TOOLCHAIN_PREFIX)gcc -c $(CFLAGS) $<
@@ -62,7 +68,7 @@ dump: dhry.elf
 
 # Clean build artifacts
 clean:
-	rm -rf *.o *.d dhry.elf dhry.map dhry.hex dhry.dump testbench.vvp testbench.vcd testbench.trace testbench.ins
+	rm -rf *.o *.d dhry.elf dhry.map dhry.hex dhry.mem dhry.bin dhry.dump testbench.vvp testbench.vcd testbench.trace testbench.ins
 
 .PHONY: test test_trace dump clean
 
