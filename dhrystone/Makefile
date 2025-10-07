@@ -24,12 +24,12 @@ timing: timing.txt
 timing.txt: timing.vvp dhry.hex
 	vvp -N timing.vvp > timing.txt
 
-testbench.vvp: testbench.v ../src/riscv_cpu.v
-	iverilog -o testbench.vvp testbench.v ../src/riscv_cpu.v
+testbench.vvp: testbench.v ../src/riscv_cpu.v ../src/components/*.v
+	iverilog -o testbench.vvp testbench.v ../src/riscv_cpu.v ../src/components/*.v
 	chmod -x testbench.vvp
 
-timing.vvp: testbench.v ../src/riscv_cpu.v
-	iverilog -o timing.vvp -DTIMING testbench.v ../src/riscv_cpu.v
+timing.vvp: testbench.v ../src/riscv_cpu.v ../src/components/*.v
+	iverilog -o timing.vvp -DTIMING testbench.v ../src/riscv_cpu.v ../src/components/*.v
 	chmod -x timing.vvp
 
 dhry.hex: dhry.elf
@@ -41,7 +41,7 @@ dhry.elf: $(OBJS) sections.lds
 	chmod -x $@
 else
 dhry.elf: $(OBJS)
-	$(TOOLCHAIN_PREFIX)gcc $(CFLAGS) -Wl,-Bstatic,-T,../firmware/linker.ld,-Map,dhry.map,--strip-debug -o $@ $(OBJS) -lgcc -lc
+	$(TOOLCHAIN_PREFIX)gcc $(CFLAGS) -Wl,-Bstatic,-T,../program/linker.ld,-Map,dhry.map,--strip-debug -o $@ $(OBJS) -lgcc -lc
 	chmod -x $@
 endif
 
