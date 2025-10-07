@@ -20,8 +20,8 @@
 #ifdef USE_MYSTDLIB
 extern char     *malloc ();
 #else
-#  include <stdlib.h>
-#  include <string.h>
+#include <stdlib.h>
+#include <string.h>
 #endif
 
 /* Global Variables: */

@@ -1,210 +1,89 @@
-// This is free and unencumbered software released into the public domain.
-//
-// Anyone is free to copy, modify, publish, use, compile, sell, or
-// distribute this software, either in source code form or as a compiled
-// binary, for any purpose, commercial or non-commercial, and by any
-// means.
+/* stdlib.c - Minimal C library implementation for RISC-V Dhrystone */
 
-#include <stdarg.h>
-#include <stdint.h>
+#include <stddef.h>
 
-extern long time();
-extern long insn();
+// Memory allocation - Simple bump allocator
+static char heap[16384];
+static char *heap_ptr = heap;
 
-#ifdef USE_MYSTDLIB
-extern char *malloc();
-extern int printf(const char *format, ...);
-
-extern void *memcpy(void *dest, const void *src, long n);
-extern char *strcpy(char *dest, const char *src);
-extern int strcmp(const char *s1, const char *s2);
-
-char heap_memory[1024];
-int heap_memory_used = 0;
-#endif
-
-long time()
-{
-	int cycles;
-	asm volatile ("rdcycle %0" : "=r"(cycles));
-	// printf("[time() -> %d]", cycles);
-	return cycles;
+void *malloc(size_t size) {
+    // Align to 4 bytes
+    size = (size + 3) & ~3;
+    
+    char *ptr = heap_ptr;
+    heap_ptr += size;
+    
+    // Check for overflow
+    if (heap_ptr > heap + sizeof(heap)) {
+        return NULL;
+    }
+    
+    return ptr;
 }
 
-long insn()
-{
-	int insns;
-	asm volatile ("rdinstret %0" : "=r"(insns));
-	// printf("[insn() -> %d]", insns);
-	return insns;
+void free(void *ptr) {
+    // Simple allocator doesn't support free
 }
 
-#ifdef USE_MYSTDLIB
-char *malloc(int size)
-{
-	char *p = heap_memory + heap_memory_used;
-	// printf("[malloc(%d) -> %d (%d..%d)]", size, (int)p, heap_memory_used, heap_memory_used + size);
-	heap_memory_used += size;
-	if (heap_memory_used > 1024)
-		asm volatile ("ebreak");
-	return p;
+// String functions
+char *strcpy(char *dest, const char *src) {
+    char *ret = dest;
+    while ((*dest++ = *src++));
+    return ret;
 }
 
-static void printf_c(int c)
-{
-	*((volatile int*)0x10000000) = c;
+int strcmp(const char *s1, const char *s2) {
+    while (*s1 && (*s1 == *s2)) {
+        s1++;
+        s2++;
+    }
+    return *(unsigned char *)s1 - *(unsigned char *)s2;
 }
 
-static void printf_s(char *p)
-{
-	while (*p)
-		*((volatile int*)0x10000000) = *(p++);
+size_t strlen(const char *s) {
+    const char *p = s;
+    while (*p) p++;
+    return p - s;
 }
 
-static void printf_d(int val)
-{
-	char buffer[32];
-	char *p = buffer;
-	if (val < 0) {
-		printf_c('-');
-		val = -val;
-	}
-	while (val || p == buffer) {
-		*(p++) = '0' + val % 10;
-		val = val / 10;
-	}
-	while (p != buffer)
-		printf_c(*(--p));
+void *memcpy(void *dest, const void *src, size_t n) {
+    char *d = dest;
+    const char *s = src;
+    while (n--) *d++ = *s++;
+    return dest;
 }
 
-int printf(const char *format, ...)
-{
-	int i;
-	va_list ap;
-
-	va_start(ap, format);
-
-	for (i = 0; format[i]; i++)
-		if (format[i] == '%') {
-			while (format[++i]) {
-				if (format[i] == 'c') {
-					printf_c(va_arg(ap,int));
-					break;
-				}
-				if (format[i] == 's') {
-					printf_s(va_arg(ap,char*));
-					break;
-				}
-				if (format[i] == 'd') {
-					printf_d(va_arg(ap,int));
-					break;
-				}
-			}
-		} else
-			printf_c(format[i]);
-
-	va_end(ap);
+void *memset(void *s, int c, size_t n) {
+    unsigned char *p = s;
+    while (n--) *p++ = (unsigned char)c;
+    return s;
 }
 
-void *memcpy(void *aa, const void *bb, long n)
-{
-	// printf("**MEMCPY**\n");
-	char *a = aa;
-	const char *b = bb;
-	while (n--) *(a++) = *(b++);
-	return aa;
+// Time functions for RISC-V
+// Read cycle counter using rdcycle instruction
+static inline long read_cycles(void) {
+    long cycles;
+    asm volatile ("rdcycle %0" : "=r" (cycles));
+    return cycles;
 }
 
-char *strcpy(char* dst, const char* src)
-{
-	char *r = dst;
-
-	while ((((uint32_t)dst | (uint32_t)src) & 3) != 0)
-	{
-		char c = *(src++);
-		*(dst++) = c;
-		if (!c) return r;
-	}
-
-	while (1)
-	{
-		uint32_t v = *(uint32_t*)src;
-
-		if (__builtin_expect((((v) - 0x01010101UL) & ~(v) & 0x80808080UL), 0))
-		{
-			dst[0] = v & 0xff;
-			if ((v & 0xff) == 0)
-				return r;
-			v = v >> 8;
-
-			dst[1] = v & 0xff;
-			if ((v & 0xff) == 0)
-				return r;
-			v = v >> 8;
-
-			dst[2] = v & 0xff;
-			if ((v & 0xff) == 0)
-				return r;
-			v = v >> 8;
-
-			dst[3] = v & 0xff;
-			return r;
-		}
-
-		*(uint32_t*)dst = v;
-		src += 4;
-		dst += 4;
-	}
+// Read instruction counter using rdinstret instruction
+static inline long read_instret(void) {
+    long instret;
+    asm volatile ("rdinstret %0" : "=r" (instret));
+    return instret;
 }
 
-int strcmp(const char *s1, const char *s2)
-{
-	while ((((uint32_t)s1 | (uint32_t)s2) & 3) != 0)
-	{
-		char c1 = *(s1++);
-		char c2 = *(s2++);
-
-		if (c1 != c2)
-			return c1 < c2 ? -1 : +1;
-		else if (!c1)
-			return 0;
-	}
-
-	while (1)
-	{
-		uint32_t v1 = *(uint32_t*)s1;
-		uint32_t v2 = *(uint32_t*)s2;
-
-		if (__builtin_expect(v1 != v2, 0))
-		{
-			char c1, c2;
-
-			c1 = v1 & 0xff, c2 = v2 & 0xff;
-			if (c1 != c2) return c1 < c2 ? -1 : +1;
-			if (!c1) return 0;
-			v1 = v1 >> 8, v2 = v2 >> 8;
-
-			c1 = v1 & 0xff, c2 = v2 & 0xff;
-			if (c1 != c2) return c1 < c2 ? -1 : +1;
-			if (!c1) return 0;
-			v1 = v1 >> 8, v2 = v2 >> 8;
-
-			c1 = v1 & 0xff, c2 = v2 & 0xff;
-			if (c1 != c2) return c1 < c2 ? -1 : +1;
-			if (!c1) return 0;
-			v1 = v1 >> 8, v2 = v2 >> 8;
-
-			c1 = v1 & 0xff, c2 = v2 & 0xff;
-			if (c1 != c2) return c1 < c2 ? -1 : +1;
-			return 0;
-		}
-
-		if (__builtin_expect((((v1) - 0x01010101UL) & ~(v1) & 0x80808080UL), 0))
-			return 0;
-
-		s1 += 4;
-		s2 += 4;
-	}
+// Time function returns cycle count
+long time(long *tloc) {
+    long t = read_cycles();
+    if (tloc) *tloc = t;
+    return t;
 }
-#endif
 
+// Instruction count function
+long insn(long *iloc) {
+    long i = read_instret();
+    if (iloc) *iloc = i;
+    return i;
+}

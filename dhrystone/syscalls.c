@@ -1,95 +1,153 @@
-// An extremely minimalist syscalls.c for newlib
-// Based on riscv newlib libgloss/riscv/sys_*.c
-// Written by Clifford Wolf.
+/* syscalls.c - Minimal system calls for RISC-V bare metal */
 
-#include <sys/stat.h>
-#include <unistd.h>
-#include <errno.h>
+#include <stdarg.h>
+#include <stddef.h>
 
-#define UNIMPL_FUNC(_f) ".globl " #_f "\n.type " #_f ", @function\n" #_f ":\n"
+// UART base address (you may need to adjust this)
+#define UART_BASE 0x10000000
 
-asm (
-	".text\n"
-	".align 2\n"
-	UNIMPL_FUNC(_open)
-	UNIMPL_FUNC(_openat)
-	UNIMPL_FUNC(_lseek)
-	UNIMPL_FUNC(_stat)
-	UNIMPL_FUNC(_lstat)
-	UNIMPL_FUNC(_fstatat)
-	UNIMPL_FUNC(_isatty)
-	UNIMPL_FUNC(_access)
-	UNIMPL_FUNC(_faccessat)
-	UNIMPL_FUNC(_link)
-	UNIMPL_FUNC(_unlink)
-	UNIMPL_FUNC(_execve)
-	UNIMPL_FUNC(_getpid)
-	UNIMPL_FUNC(_fork)
-	UNIMPL_FUNC(_kill)
-	UNIMPL_FUNC(_wait)
-	UNIMPL_FUNC(_times)
-	UNIMPL_FUNC(_gettimeofday)
-	UNIMPL_FUNC(_ftime)
-	UNIMPL_FUNC(_utime)
-	UNIMPL_FUNC(_chown)
-	UNIMPL_FUNC(_chmod)
-	UNIMPL_FUNC(_chdir)
-	UNIMPL_FUNC(_getcwd)
-	UNIMPL_FUNC(_sysconf)
-	"j unimplemented_syscall\n"
-);
-
-void unimplemented_syscall()
-{
-	const char *p = "Unimplemented system call called!\n";
-	while (*p)
-		*(volatile int*)0x10000000 = *(p++);
-	asm volatile ("ebreak");
-	__builtin_unreachable();
+// Simple UART output
+static void uart_putc(char c) {
+    // For simulation, just write to a fixed address
+    // The testbench can monitor this
+    volatile char *uart = (volatile char *)UART_BASE;
+    *uart = c;
 }
 
-ssize_t _read(int file, void *ptr, size_t len)
-{
-	// always EOF
-	return 0;
+// Basic printf implementation
+static void print_string(const char *s) {
+    while (*s) {
+        uart_putc(*s++);
+    }
 }
 
-ssize_t _write(int file, const void *ptr, size_t len)
-{
-	const void *eptr = ptr + len;
-	while (ptr != eptr)
-		*(volatile int*)0x10000000 = *(char*)(ptr++);
-	return len;
+static void print_int(int val) {
+    char buffer[12];
+    int i = 0;
+    int is_negative = 0;
+    
+    if (val < 0) {
+        is_negative = 1;
+        val = -val;
+    }
+    
+    if (val == 0) {
+        uart_putc('0');
+        return;
+    }
+    
+    while (val > 0) {
+        buffer[i++] = '0' + (val % 10);
+        val /= 10;
+    }
+    
+    if (is_negative) {
+        uart_putc('-');
+    }
+    
+    while (i > 0) {
+        uart_putc(buffer[--i]);
+    }
 }
 
-int _close(int file)
-{
-	// close is called before _exit()
-	return 0;
+static void print_hex(unsigned int val) {
+    const char hex[] = "0123456789abcdef";
+    uart_putc('0');
+    uart_putc('x');
+    for (int i = 28; i >= 0; i -= 4) {
+        uart_putc(hex[(val >> i) & 0xF]);
+    }
 }
 
-int _fstat(int file, struct stat *st)
-{
-	// fstat is called during libc startup
-	errno = ENOENT;
-	return -1;
+// Simple printf supporting %d, %s, %c, %x
+int printf(const char *format, ...) {
+    va_list args;
+    va_start(args, format);
+    
+    while (*format) {
+        if (*format == '%') {
+            format++;
+            switch (*format) {
+                case 'd':
+                    print_int(va_arg(args, int));
+                    break;
+                case 's':
+                    print_string(va_arg(args, char*));
+                    break;
+                case 'c':
+                    uart_putc((char)va_arg(args, int));
+                    break;
+                case 'x':
+                    print_hex(va_arg(args, unsigned int));
+                    break;
+                case '%':
+                    uart_putc('%');
+                    break;
+                default:
+                    uart_putc('%');
+                    uart_putc(*format);
+                    break;
+            }
+        } else {
+            uart_putc(*format);
+        }
+        format++;
+    }
+    
+    va_end(args);
+    return 0;
 }
 
-void *_sbrk(ptrdiff_t incr)
-{
-	extern unsigned char _end[];   // Defined by linker
-	static unsigned long heap_end;
-
-	if (heap_end == 0)
-		heap_end = (long)_end;
-
-	heap_end += incr;
-	return (void *)(heap_end - incr);
+// Scanf stub - returns fixed value for Dhrystone
+int scanf(const char *format, ...) {
+    // For Dhrystone, just return success
+    return 1;
 }
 
-void _exit(int exit_status)
-{
-	asm volatile ("ebreak");
-	__builtin_unreachable();
+// Other system call stubs
+void _exit(int status) {
+    while (1);
 }
 
+int close(int file) {
+    return -1;
+}
+
+int fstat(int file, void *st) {
+    return -1;
+}
+
+int isatty(int file) {
+    return 1;
+}
+
+int lseek(int file, int ptr, int dir) {
+    return 0;
+}
+
+int read(int file, char *ptr, int len) {
+    return 0;
+}
+
+int write(int file, char *ptr, int len) {
+    int i;
+    for (i = 0; i < len; i++) {
+        uart_putc(ptr[i]);
+    }
+    return len;
+}
+
+void *sbrk(int incr) {
+    extern char _end;
+    static char *heap_end = 0;
+    char *prev_heap_end;
+    
+    if (heap_end == 0) {
+        heap_end = &_end;
+    }
+    
+    prev_heap_end = heap_end;
+    heap_end += incr;
+    
+    return (void *)prev_heap_end;
+}

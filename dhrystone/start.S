@@ -1,51 +1,51 @@
-	.section .text
-	.global start
-	.global main
+# start.S - Minimal RISC-V startup code for Dhrystone
+
+.section .text
+.globl start
+.globl _start
 
 start:
-	/* print "START\n" */
-	lui a0,0x10000000>>12
-	addi a1,zero,'S'
-	addi a2,zero,'T'
-	addi a3,zero,'A'
-	addi a4,zero,'R'
-	addi a5,zero,'\n'
-	sw a1,0(a0)
-	sw a2,0(a0)
-	sw a3,0(a0)
-	sw a4,0(a0)
-	sw a2,0(a0)
-	sw a5,0(a0)
+_start:
+    # Initialize global pointer
+    .option push
+    .option norelax
+    la gp, __global_pointer$
+    .option pop
+    
+    # Initialize stack pointer
+    la sp, _sp
+    
+    # Clear BSS section
+    la t0, _sbss
+    la t1, _ebss
+    beq t0, t1, skip_bss
+clear_bss:
+    sw zero, 0(t0)
+    addi t0, t0, 4
+    blt t0, t1, clear_bss
+skip_bss:
+    
+    # Copy data section from ROM to RAM
+    la t0, _sidata
+    la t1, _sdata
+    la t2, _edata
+    beq t1, t2, skip_data
+copy_data:
+    lw t3, 0(t0)
+    sw t3, 0(t1)
+    addi t0, t0, 4
+    addi t1, t1, 4
+    blt t1, t2, copy_data
+skip_data:
+    
+    # Call main
+    call main
+    
+    # Exit loop (halt)
+exit_loop:
+    j exit_loop
 
-	/* execute some insns for "make timing" */
-	lui a0,0
-	auipc a0,0
-	slli a0,a0,0
-	slli a0,a0,31
-	addi a1,zero,0
-	sll a0,a0,a1
-	addi a1,zero,31
-	sll a0,a0,a1
-
-	/* set stack pointer */
-	lui sp,(64*1024)>>12
-
-	/* jump to main C code */
-	jal ra,main
-
-	/* print "DONE\n" */
-	lui a0,0x10000000>>12
-	addi a1,zero,'D'
-	addi a2,zero,'O'
-	addi a3,zero,'N'
-	addi a4,zero,'E'
-	addi a5,zero,'\n'
-	sw a1,0(a0)
-	sw a2,0(a0)
-	sw a3,0(a0)
-	sw a4,0(a0)
-	sw a5,0(a0)
-
-	/* trap */
-	ebreak
-
+# Dummy interrupt/exception handler
+.align 2
+trap_handler:
+    j trap_handler

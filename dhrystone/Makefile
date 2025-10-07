@@ -1,61 +1,69 @@
+# Makefile for Dhrystone on RISC-V
+
 USE_MYSTDLIB = 0
 OBJS = dhry_1.o dhry_2.o stdlib.o
-CFLAGS = -MD -O3 -mabi=ilp32 -march=rv32im -DTIME -DRISCV
-TOOLCHAIN_PREFIX = $(HOME)/riscv32/bin/riscv32-unknown-elf-
+CFLAGS = -MD -O3 -mabi=ilp32 -march=rv32i -DTIME -DRISCV
+TOOLCHAIN_PREFIX = riscv32-unknown-elf-
 
 ifeq ($(USE_MYSTDLIB),1)
 CFLAGS += -DUSE_MYSTDLIB -ffreestanding -nostdlib
 OBJS += start.o
+LINKER_SCRIPT = sections.lds
 else
 OBJS += syscalls.o
+LINKER_SCRIPT = linker.ld
 endif
 
+# Default target
 test: testbench.vvp dhry.hex
 	vvp -N testbench.vvp
 
+# Run with trace
 test_trace: testbench.vvp dhry.hex
 	vvp -N $< +trace
 	python3 ./showtrace.py testbench.trace dhry.elf > testbench.ins
 
-timing: timing.txt
-	grep '^##' timing.txt | gawk 'x != "" {print x,$$3-y;} {x=$$2;y=$$3;}' | sort | uniq -c | \
-		gawk '{printf("%03d-%-7s %2d %-8s (%d)\n",$$3,$$2,$$3,$$2,$$1);}' | sort | cut -c13-
-
-timing.txt: timing.vvp dhry.hex
-	vvp -N timing.vvp > timing.txt
-
+# Compile testbench
 testbench.vvp: testbench.v ../src/riscv_cpu.v ../src/components/*.v
-	iverilog -o testbench.vvp testbench.v ../src/riscv_cpu.v ../src/components/*.v
+	iverilog -g2012 -o testbench.vvp testbench.v ../src/riscv_cpu.v ../src/components/*.v
 	chmod -x testbench.vvp
 
-timing.vvp: testbench.v ../src/riscv_cpu.v ../src/components/*.v
-	iverilog -o timing.vvp -DTIMING testbench.v ../src/riscv_cpu.v ../src/components/*.v
-	chmod -x timing.vvp
-
+# Generate hex file
 dhry.hex: dhry.elf
 	$(TOOLCHAIN_PREFIX)objcopy -O verilog $< $@
 
+# Link ELF
 ifeq ($(USE_MYSTDLIB),1)
-dhry.elf: $(OBJS) sections.lds
-	$(TOOLCHAIN_PREFIX)gcc $(CFLAGS) -Wl,-Bstatic,-T,sections.lds,-Map,dhry.map,--strip-debug -o $@ $(OBJS) -lgcc
+dhry.elf: $(OBJS) $(LINKER_SCRIPT)
+	$(TOOLCHAIN_PREFIX)gcc $(CFLAGS) -Wl,-Bstatic,-T,$(LINKER_SCRIPT),-Map,dhry.map,--strip-debug -o $@ $(OBJS) -lgcc
 	chmod -x $@
+	$(TOOLCHAIN_PREFIX)size $@
 else
-dhry.elf: $(OBJS)
-	$(TOOLCHAIN_PREFIX)gcc $(CFLAGS) -Wl,-Bstatic,-T,../program/linker.ld,-Map,dhry.map,--strip-debug -o $@ $(OBJS) -lgcc -lc
+dhry.elf: $(OBJS) $(LINKER_SCRIPT)
+	$(TOOLCHAIN_PREFIX)gcc $(CFLAGS) -Wl,-Bstatic,-T,$(LINKER_SCRIPT),-Map,dhry.map,--strip-debug -o $@ $(OBJS) -lgcc -lc
 	chmod -x $@
+	$(TOOLCHAIN_PREFIX)size $@
 endif
 
+# Compile C files
 %.o: %.c
 	$(TOOLCHAIN_PREFIX)gcc -c $(CFLAGS) $<
 
+# Assemble assembly files
 %.o: %.S
 	$(TOOLCHAIN_PREFIX)gcc -c $(CFLAGS) $<
 
+# Suppress warnings for dhrystone legacy code
 dhry_1.o dhry_2.o: CFLAGS += -Wno-implicit-int -Wno-implicit-function-declaration
 
-clean:
-	rm -rf *.o *.d dhry.elf dhry.map dhry.bin dhry.hex testbench.vvp testbench.vcd timing.vvp timing.txt testbench_nola.vvp
+# Generate disassembly
+dump: dhry.elf
+	$(TOOLCHAIN_PREFIX)objdump -D $< > dhry.dump
 
-.PHONY: test clean
+# Clean build artifacts
+clean:
+	rm -rf *.o *.d dhry.elf dhry.map dhry.hex dhry.dump testbench.vvp testbench.vcd testbench.trace testbench.ins
+
+.PHONY: test test_trace dump clean
 
 -include *.d
