@@ -1,10 +1,16 @@
 `timescale 1 ns / 1 ps
 
 module testbench;
+    // Parameters for Memory Map
+    parameter DATA_MEM_SIZE_BYTES = 256*1024; // 256KB
+    parameter MMIO_BASE_ADDR      = 32'h1000_0000; // MMIO starts at 0x1000_0000 (User-configurable)
+    parameter MMIO_SIZE_BYTES     = 1024;          // 1KB MMIO region
+    
+    // Clock and Reset
     reg clk = 1;
     reg reset = 1;
     
-    // CPU signals
+    // CPU signals (interface remains the same)
     wire [31:0] PC;
     wire [31:0] Instr;
     wire        MemWrite;
@@ -13,13 +19,8 @@ module testbench;
     wire [2:0]  funct3;
     wire [31:0] PCW, ALUResultW, WriteDataW;
     
+    // Clock generation
     always #5 clk = ~clk;
-    
-    initial begin
-        reset = 1;
-        #100;
-        reset = 0;
-    end
     
     // Instantiate CPU
     riscv_cpu cpu (
@@ -38,107 +39,131 @@ module testbench;
         .WriteDataW(WriteDataW)
     );
     
-    // Unified memory (256KB)
-    reg [7:0] memory [0:256*1024-1];
+    // ===============================================
+    // MEMORY DECLARATIONS (HARVARD ARCHITECTURE + MMIO)
+    // ===============================================
     
-    // Load program
-    initial begin
-	integer i;
-	for (i = 0; i < 256*1024; i = i + 1)
-		memory[i] = 8'b0;
+    // Instruction Memory (Read-only, 256KB)
+    reg [7:0] instruction_memory [0:DATA_MEM_SIZE_BYTES-1]; 
 
-        $readmemh("dhry.mem", memory);	
-	reset = 1'b1;
-	#10 reset = 1'b0;
+    // Data Memory (Read/Write, 256KB)
+    reg [7:0] data_memory [0:DATA_MEM_SIZE_BYTES-1];
+    
+    // Memory Mapped I/O (Read/Write, 1KB)
+    reg [7:0] mmio_memory [0:MMIO_SIZE_BYTES-1];
+
+    // ===============================================
+    // INITIALIZATION & PROGRAM LOAD
+    // ===============================================
+    initial begin
+        integer i;
+        
+        // Initialize all memories to zero
+        for (i = 0; i < DATA_MEM_SIZE_BYTES; i = i + 1) begin
+            instruction_memory[i] = 8'b0;
+            data_memory[i] = 8'b0;
+        end
+        for (i = 0; i < MMIO_SIZE_BYTES; i = i + 1) begin
+            mmio_memory[i] = 8'b0;
+        end
+
+        // Load instructions/data into instruction memory (where PC will look)
+        $readmemh("dhry.mem", instruction_memory);  
+        
+        // Reset sequence
+        reset = 1'b1;
+        #100; // Reset for 100ns
+        reset = 1'b0;
     end
+    
+    // ===============================================
+    // INSTRUCTION FETCH (from Instruction Memory)
+    // ===============================================
     
     // Instruction fetch (word-aligned, byte-addressed)
-    assign Instr = {memory[PC+3], memory[PC+2], memory[PC+1], memory[PC]};
+    assign Instr = {instruction_memory[PC+3], instruction_memory[PC+2], instruction_memory[PC+1], instruction_memory[PC]};
     
-    // Data memory read (combinational)
+    // ===============================================
+    // DATA MEMORY READ (from Data Memory or MMIO)
+    // ===============================================
+    
     reg [31:0] read_data;
     
-    always @(posedge clk) begin
-        case(funct3)
-            3'b000: begin // LB (Load Byte)
-                case(DataAdr[1:0])
-                    2'b00: read_data = {{24{memory[DataAdr][7]}}, memory[DataAdr]};
-                    2'b01: read_data = {{24{memory[DataAdr][7]}}, memory[DataAdr]};
-                    2'b10: read_data = {{24{memory[DataAdr][7]}}, memory[DataAdr]};
-                    2'b11: read_data = {{24{memory[DataAdr][7]}}, memory[DataAdr]};
-                endcase
-            end
-            
-            3'b001: begin // LH (Load Halfword)
-                case(DataAdr[1])
-                    1'b0: read_data = {{16{memory[DataAdr+1][7]}}, memory[DataAdr+1], memory[DataAdr]};
-                    1'b1: read_data = {{16{memory[DataAdr+1][7]}}, memory[DataAdr+1], memory[DataAdr]};
-                endcase
-            end
-            
-            3'b010: begin // LW (Load Word)
-                read_data = {memory[DataAdr+3], memory[DataAdr+2], memory[DataAdr+1], memory[DataAdr]};
-            end
-            
-            3'b100: begin // LBU (Load Byte Unsigned)
-                case(DataAdr[1:0])
-                    2'b00: read_data = {24'b0, memory[DataAdr]};
-                    2'b01: read_data = {24'b0, memory[DataAdr]};
-                    2'b10: read_data = {24'b0, memory[DataAdr]};
-                    2'b11: read_data = {24'b0, memory[DataAdr]};
-                endcase
-            end
-            
-            3'b101: begin // LHU (Load Halfword Unsigned)
-                case(DataAdr[1])
-                    1'b0: read_data = {16'b0, memory[DataAdr+1], memory[DataAdr]};
-                    1'b1: read_data = {16'b0, memory[DataAdr+1], memory[DataAdr]};
-                endcase
-            end
-            
-            default: read_data = 32'b0;
-        endcase
-    end
+    // Logic for determining if the address is within the MMIO range
+    wire is_mmio_addr = (DataAdr >= MMIO_BASE_ADDR) && (DataAdr < (MMIO_BASE_ADDR + MMIO_SIZE_BYTES));
+    wire [9:0] mmio_offset = DataAdr[9:0]; // 1KB access requires 10 bits of offset
     
-    assign ReadData = read_data;
-    
-    // Data memory write (synchronous)
+    // Data Read logic: routes the read based on is_mmio_addr
     always @(posedge clk) begin
-        if (MemWrite && !reset) begin
+        if (is_mmio_addr) begin
+            // MMIO Access
             case(funct3)
-                3'b000: begin // SB (Store Byte)
-                    case(DataAdr[1:0])
-                        2'b00: memory[DataAdr] <= WriteData[7:0];
-                        2'b01: memory[DataAdr] <= WriteData[7:0];
-                        2'b10: memory[DataAdr] <= WriteData[7:0];
-                        2'b11: memory[DataAdr] <= WriteData[7:0];
-                    endcase
-                end
-                
-                3'b001: begin // SH (Store Halfword)
-                    case(DataAdr[1])
-                        1'b0: begin
-                            memory[DataAdr]   <= WriteData[7:0];
-                            memory[DataAdr+1] <= WriteData[15:8];
-                        end
-                        1'b1: begin
-                            memory[DataAdr]   <= WriteData[7:0];
-                            memory[DataAdr+1] <= WriteData[15:8];
-                        end
-                    endcase
-                end
-                
-                3'b010: begin // SW (Store Word)
-                    memory[DataAdr]   <= WriteData[7:0];
-                    memory[DataAdr+1] <= WriteData[15:8];
-                    memory[DataAdr+2] <= WriteData[23:16];
-                    memory[DataAdr+3] <= WriteData[31:24];
-                end
+                3'b000: read_data = {{24{mmio_memory[mmio_offset][7]}}, mmio_memory[mmio_offset]}; // LB
+                3'b001: read_data = {{16{mmio_memory[mmio_offset+1][7]}}, mmio_memory[mmio_offset+1], mmio_memory[mmio_offset]}; // LH
+                3'b010: read_data = {mmio_memory[mmio_offset+3], mmio_memory[mmio_offset+2], mmio_memory[mmio_offset+1], mmio_memory[mmio_offset]}; // LW
+                3'b100: read_data = {24'b0, mmio_memory[mmio_offset]}; // LBU
+                3'b101: read_data = {16'b0, mmio_memory[mmio_offset+1], mmio_memory[mmio_offset]}; // LHU
+                default: read_data = 32'b0;
+            endcase
+        end else begin
+            // Standard Data Memory Access (low memory)
+            case(funct3)
+                3'b000: read_data = {{24{data_memory[DataAdr][7]}}, data_memory[DataAdr]}; // LB
+                3'b001: read_data = {{16{data_memory[DataAdr+1][7]}}, data_memory[DataAdr+1], data_memory[DataAdr]}; // LH
+                3'b010: read_data = {data_memory[DataAdr+3], data_memory[DataAdr+2], data_memory[DataAdr+1], data_memory[DataAdr]}; // LW
+                3'b100: read_data = {24'b0, data_memory[DataAdr]}; // LBU
+                3'b101: read_data = {16'b0, data_memory[DataAdr+1], data_memory[DataAdr]}; // LHU
+                default: read_data = 32'b0;
             endcase
         end
     end
     
-    // Performance monitoring
+    assign ReadData = read_data;
+    
+    // ===============================================
+    // DATA MEMORY WRITE (to Data Memory or MMIO)
+    // ===============================================
+    
+    always @(posedge clk) begin
+        if (MemWrite && !reset) begin
+            if (is_mmio_addr) begin
+                // MMIO Write Access
+                case(funct3)
+                    3'b000: mmio_memory[mmio_offset] <= WriteData[7:0]; // SB
+                    3'b001: begin // SH
+                        mmio_memory[mmio_offset]   <= WriteData[7:0];
+                        mmio_memory[mmio_offset+1] <= WriteData[15:8];
+                    end
+                    3'b010: begin // SW
+                        mmio_memory[mmio_offset]   <= WriteData[7:0];
+                        mmio_memory[mmio_offset+1] <= WriteData[15:8];
+                        mmio_memory[mmio_offset+2] <= WriteData[23:16];
+                        mmio_memory[mmio_offset+3] <= WriteData[31:24];
+                    end
+                endcase
+            end else begin
+                // Standard Data Memory Write Access (low memory)
+                case(funct3)
+                    3'b000: data_memory[DataAdr] <= WriteData[7:0]; // SB
+                    3'b001: begin // SH
+                        data_memory[DataAdr]   <= WriteData[7:0];
+                        data_memory[DataAdr+1] <= WriteData[15:8];
+                    end
+                    3'b010: begin // SW
+                        data_memory[DataAdr]   <= WriteData[7:0];
+                        data_memory[DataAdr+1] <= WriteData[15:8];
+                        data_memory[DataAdr+2] <= WriteData[23:16];
+                        data_memory[DataAdr+3] <= WriteData[31:24];
+                    end
+                endcase
+            end
+        end
+    end
+    
+    // ===============================================
+    // PERFORMANCE MONITORING & DEBUG
+    // ===============================================
+    
     integer cycle_count = 0;
     integer instr_count = 0;
     
@@ -203,8 +228,8 @@ module testbench;
     // Monitor writes for debugging
     always @(posedge clk) begin
         if (MemWrite && !reset) begin
-            $display("[WRITE] Addr=0x%08x, Data=0x%08x, funct3=%0d", 
-                     DataAdr, WriteData, funct3);
+            $display("[WRITE] Addr=0x%08x, Data=0x%08x, Target=%s, funct3=%0d", 
+                     DataAdr, WriteData, (is_mmio_addr ? "MMIO" : "DATA"), funct3);
         end
     end
 
