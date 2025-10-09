@@ -1,4 +1,4 @@
-module FF_me_wr (
+ddmodule FF_me_wr (
     input clk,
     input RegWriteM,
     input [1:0] ResultSrcM,
