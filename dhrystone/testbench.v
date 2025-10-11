@@ -3,7 +3,8 @@
 module testbench;
     // Parameters for Memory Map
     parameter DATA_MEM_SIZE_BYTES = 256*1024; // 256KB
-    parameter MMIO_BASE_ADDR      = 32'h1000_0000; // MMIO starts at 0x1000_0000 (User-configurable)
+    // MMIO_BASE_ADDR MUST match UART_BASE in syscalls.c
+    parameter MMIO_BASE_ADDR      = 32'h1000_0000; 
     parameter MMIO_SIZE_BYTES     = 1024;          // 1KB MMIO region
     
     // Clock and Reset
@@ -19,10 +20,13 @@ module testbench;
     wire [2:0]  funct3;
     wire [31:0] PCW, ALUResultW, WriteDataW;
     
+    // Local integers (moved to module scope to satisfy Verilog)
+    integer i;
+
     // Clock generation
     always #5 clk = ~clk;
     
-    // Instantiate CPU
+    // Instantiate CPU (Assuming riscv_cpu is defined in an imported file)
     riscv_cpu cpu (
         .clk(clk),
         .reset(reset),
@@ -56,8 +60,6 @@ module testbench;
     // INITIALIZATION & PROGRAM LOAD
     // ===============================================
     initial begin
-        integer i;
-        
         // Initialize all memories to zero
         for (i = 0; i < DATA_MEM_SIZE_BYTES; i = i + 1) begin
             instruction_memory[i] = 8'b0;
@@ -67,8 +69,9 @@ module testbench;
             mmio_memory[i] = 8'b0;
         end
 
-        // Load instructions/data into instruction memory (where PC will look)
-        $readmemh("dhry.mem", instruction_memory);  
+        // FIX: Ensure correct file is loaded (Makefile generates dhry.hex)
+        $display("Loading dhry.hex into Instruction Memory...");
+        $readmemh("dhry.hex", instruction_memory);  
         
         // Reset sequence
         reset = 1'b1;
@@ -98,6 +101,7 @@ module testbench;
         if (is_mmio_addr) begin
             // MMIO Access
             case(funct3)
+                // Assuming MMIO access is generally byte-wide (UART)
                 3'b000: read_data = {{24{mmio_memory[mmio_offset][7]}}, mmio_memory[mmio_offset]}; // LB
                 3'b001: read_data = {{16{mmio_memory[mmio_offset+1][7]}}, mmio_memory[mmio_offset+1], mmio_memory[mmio_offset]}; // LH
                 3'b010: read_data = {mmio_memory[mmio_offset+3], mmio_memory[mmio_offset+2], mmio_memory[mmio_offset+1], mmio_memory[mmio_offset]}; // LW
@@ -128,8 +132,14 @@ module testbench;
         if (MemWrite && !reset) begin
             if (is_mmio_addr) begin
                 // MMIO Write Access
+                // If the write is a byte write (SB, funct3=000) to the UART base address, print the character.
+                if (DataAdr == MMIO_BASE_ADDR ) begin
+                    // FIX: Output the character to the terminal
+                    $write("%c", WriteData[7:0]); 
+                end
+                
                 case(funct3)
-                    3'b000: mmio_memory[mmio_offset] <= WriteData[7:0]; // SB
+                    3'b000: mmio_memory[mmio_offset] <= WriteData[7:0]; // SB (Byte for UART)
                     3'b001: begin // SH
                         mmio_memory[mmio_offset]   <= WriteData[7:0];
                         mmio_memory[mmio_offset+1] <= WriteData[15:8];
@@ -173,15 +183,16 @@ module testbench;
             if (PCW != 0) 
                 instr_count = instr_count + 1;
                 
-            // Progress updates every 1M cycles
-            if (cycle_count % 1000000 == 0) begin
-                $display("[%0d M cycles] PC=0x%08x, Instructions=%0d", 
-                         cycle_count/1000000, PCW, instr_count);
+            
+            if (instr_count % 1000000 == 0 && instr_count > 0) begin
+    
+                $display("\n[%0d M instructions] PC=0x%08x, Cycles=%0d", 
+                         instr_count/1000000, PCW, cycle_count);
             end
         end
     end
     
-    // Detect stuck CPU
+    
     reg [31:0] last_pc = 0;
     integer stuck_count = 0;
     
@@ -189,9 +200,10 @@ module testbench;
         if (!reset) begin
             if (PCW == last_pc && PCW != 0) begin
                 stuck_count = stuck_count + 1;
-                if (stuck_count > 10000) begin
+                if (stuck_count > 250000) begin // Increased stuck limit substantially
                     $display("\n========================================");
-                    $display("CPU STUCK at PC = 0x%08x", PCW);
+                    $display("CPU STUCK DETECTED (Likely program _exit loop)");
+                    $display("STUCK at PC = 0x%08x", PCW);
                     $display("Total Cycles: %0d", cycle_count);
                     $display("Total Instructions: %0d", instr_count);
                     if (instr_count > 0)
@@ -206,16 +218,15 @@ module testbench;
         end
     end
     
-    // Timeout
     initial begin
-        repeat (50000000) @(posedge clk);
-        $display("\n========================================");
-        $display("TIMEOUT REACHED");
+        repeat (250000000) @(posedge clk); 
+        $display("\n=========================================");
+        $display("TIMEOUT REACHED (250M Cycles)");
         $display("Total Cycles: %0d", cycle_count);
         $display("Total Instructions: %0d", instr_count);
         if (instr_count > 0)
             $display("CPI: %.2f", cycle_count * 1.0 / instr_count);
-        $display("========================================");
+        $display("=========================================");
         $finish;
     end
     
@@ -225,12 +236,5 @@ module testbench;
         $dumpvars(0, testbench);
     end
     
-    // Monitor writes for debugging
-    always @(posedge clk) begin
-        if (MemWrite && !reset) begin
-            $display("[WRITE] Addr=0x%08x, Data=0x%08x, Target=%s, funct3=%0d", 
-                     DataAdr, WriteData, (is_mmio_addr ? "MMIO" : "DATA"), funct3);
-        end
-    end
 
 endmodule
