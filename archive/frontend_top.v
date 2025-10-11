@@ -1,16 +1,25 @@
 module frontend_top #(
-    parameter FE_ADDR_W     = 32,
-    parameter FE_DATA_W     = 32,
-    parameter BE_ADDR_W     = 32,
-    parameter BE_DATA_W     = 32,
-    parameter NWAYS_W       = 2,
-    parameter NLINES_W      = 7,
-    parameter WORD_OFFSET_W = 4,
-    parameter WTBUF_DEPTH_W = 4,
-    parameter REP_POLICY    = 1,
-    parameter WRITE_POL     = 1,  // Write-through
-    parameter USE_CTRL      = 0,
-    parameter USE_CTRL_CNT  = 0
+parameter FE_ADDR_W     = 32,
+parameter FE_DATA_W     = 32,
+parameter BE_ADDR_W     = 32,
+parameter BE_DATA_W     = 32,
+parameter NWAYS_W       = 2,
+parameter NLINES_W      = 7,   // number of index bits for lines (must match frontend & backend)
+parameter WORD_OFFSET_W = 4,   // offset bits within a cache line (must match frontend & backend)
+parameter WTBUF_DEPTH_W = 4,
+parameter REP_POLICY    = 1,   // e.g. PLRU_MRU
+parameter WRITE_POL     = 1,   // 1 = WRITE_THROUGH (match both)
+parameter USE_CTRL      = 0,
+parameter USE_CTRL_CNT  = 0,
+parameter AXI_ID_W      = 8,
+parameter AXI_ID        = 0,
+parameter AXI_LEN_W     = 8,
+
+// AXI RAM / backend-only params (ok to include on both)
+parameter READ_ON_WRITE   = 1,
+parameter PIPELINE_OUTPUT = 0
+//parameter RAM_FILE        = "none"
+
 ) (
     // System signals
     input         clk,
@@ -47,9 +56,10 @@ module frontend_top #(
     output [31:0] WriteDataW
 );
 
-    // Derived parameters
-    localparam FE_NBYTES_W = $clog2(FE_DATA_W / 8);
-    localparam ADDR_W = USE_CTRL + FE_ADDR_W - FE_NBYTES_W;
+localparam FE_NBYTES   = FE_DATA_W / 8;
+localparam FE_NBYTES_W = $clog2(FE_NBYTES);
+localparam ADDR_W      = USE_CTRL + FE_ADDR_W - FE_NBYTES_W;
+
     
     // CPU interface signals
     wire        cpu_mem_write;
@@ -122,7 +132,7 @@ module frontend_top #(
                         iob_addr <= cpu_data_adr[ADDR_W+FE_NBYTES_W-1:FE_NBYTES_W];
                         iob_wdata <= cpu_write_data;
                         iob_wstrb <= is_write_request ? 4'b1111 : 4'b0000;
-                        mem_access_pending <= 1'b1;
+                        mem_access_pending <= 1'b0;
                         last_was_write <= is_write_request;
                     end else begin
                         iob_valid <= 1'b0;
